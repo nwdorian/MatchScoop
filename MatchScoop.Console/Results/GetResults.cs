@@ -2,22 +2,31 @@ using System.Globalization;
 using CSharpFunctionalExtensions;
 using HtmlAgilityPack;
 using MatchScoop.Console.Models;
+using MatchScoop.Console.Options;
+using Microsoft.Extensions.Options;
 
 namespace MatchScoop.Console.Results;
 
-public static class GetResults
+public class GetResults
 {
-    public static Result<IReadOnlyList<Match>> Handle(string url)
+    private readonly ScrapingOptions _scrapingOptions;
+
+    public GetResults(IOptions<ScrapingOptions> scrapingOptions)
     {
-        var webpage = new HtmlWeb().Load(url);
+        _scrapingOptions = scrapingOptions.Value;
+    }
+
+    public Result<IReadOnlyList<Match>> Handle()
+    {
+        var webpage = new HtmlWeb().Load(_scrapingOptions.BaseAddress);
         var nodes = webpage.DocumentNode.SelectNodes("//*[@id=\"content\"]/div[@class='game_summaries']/div/table[@class='teams']/tbody");
 
-        if (nodes.Count == 0)
-        {
-            return Result.Failure<IReadOnlyList<Match>>("No matches found.");
-        }
-
         var matches = new List<Match>();
+
+        if (nodes is null)
+        {
+            return matches;
+        }
 
         foreach (var node in nodes)
         {
