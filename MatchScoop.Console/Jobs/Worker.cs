@@ -26,11 +26,21 @@ public class Worker : BackgroundService
 
         try
         {
-            await GetResultsAndSendEmail();
-            while (await timer.WaitForNextTickAsync(stoppingToken))
+            do
             {
-                await GetResultsAndSendEmail();
-            }
+                _logger.LogInformation("Getting match information.");
+                var result = await _getResults.Handle();
+                if (result.IsFailure)
+                {
+                    _logger.LogInformation("There was an error getting results: {Error}", result.Error);
+                    return;
+                }
+                var matches = result.Value;
+                _logger.LogInformation("{GamesCount} games gathered.", matches.Count);
+
+                _logger.LogInformation("Sending email.");
+                await _sendResultsEmail.Handle(matches);
+            } while (await timer.WaitForNextTickAsync(stoppingToken));
         }
         catch (OperationCanceledException oex)
         {
@@ -40,20 +50,5 @@ public class Worker : BackgroundService
         {
             _logger.LogError(ex, "There was an error.");
         }
-    }
-
-    private async Task GetResultsAndSendEmail()
-    {
-        _logger.LogInformation("Getting match information.");
-        var result = await _getResults.Handle();
-        if (result.IsFailure)
-        {
-            _logger.LogInformation("There was an error getting results: {Error}", result.Error);
-            return;
-        }
-        var matches = result.Value;
-        _logger.LogInformation("{GamesCount} games gathered.", matches.Count);
-
-        await _sendResultsEmail.Handle(matches);
     }
 }
