@@ -16,9 +16,9 @@ public class GetResults
         _scrapingOptions = scrapingOptions.Value;
     }
 
-    public Result<IReadOnlyList<Match>> Handle()
+    public async Task<Result<IReadOnlyList<Match>>> Handle()
     {
-        var webpage = new HtmlWeb().Load(_scrapingOptions.BaseAddress);
+        var webpage = await new HtmlWeb().LoadFromWebAsync(_scrapingOptions.BaseAddress);
         var nodes = webpage.DocumentNode.SelectNodes("//*[@id=\"content\"]/div[@class='game_summaries']/div/table[@class='teams']/tbody");
 
         var matches = new List<Match>();

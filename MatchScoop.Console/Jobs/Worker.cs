@@ -45,7 +45,7 @@ public class Worker : BackgroundService
     private async Task GetResultsAndSendEmail()
     {
         _logger.LogInformation("Getting match information.");
-        var result = _getResults.Handle();
+        var result = await _getResults.Handle();
         if (result.IsFailure)
         {
             _logger.LogInformation("There was an error getting results: {Error}", result.Error);
