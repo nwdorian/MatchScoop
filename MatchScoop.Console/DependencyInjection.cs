@@ -1,4 +1,5 @@
 using MatchScoop.Console.Email;
+using MatchScoop.Console.Jobs;
 using MatchScoop.Console.Options;
 using MatchScoop.Console.Results;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ public static class DependencyInjection
     {
         services.ConfigureOptions();
         services.ConfigureFeatures();
+        services.ConfigureJobs();
 
         return services;
     }
@@ -26,5 +28,8 @@ public static class DependencyInjection
         services.AddScoped<SendResultsEmail>();
         services.AddScoped<GetResults>();
     }
+
+    private static void ConfigureJobs(this IServiceCollection services)
+        => services.AddHostedService<Worker>();
 
 }
