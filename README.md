@@ -9,11 +9,13 @@ Runs as a background service, reading NBA match results from a website and sendi
 ### Prerequisites
 
 - .NET 9 SDK
+- A Gmail account with 2-Step Verification enabled and an App Password generated (since Gmail blocks less secure apps).
 
 ### Installation
 
 1. Clone the repository
     - `git clone https://github.com/nwdorian/MatchScoop.git`
+
 2. Configure `appsettings.json`
     - update email settings
 3. Navigate to project directory and run the project
@@ -22,6 +24,14 @@ Runs as a background service, reading NBA match results from a website and sendi
 
 > [!NOTE]
 > For testing purposes the email with results will be sent on startup.
+
+### Gmail settings
+
+- **UserEmail**: your Gmail address
+- **Password**: The App Password generated in your Gmail account. (you can create it from your Google Account under Security > App Passwords).
+
+> [!TIP]
+> Use a different SMTP server by editing the *SmtpServer* and *Host* settings.
 
 ## Contributing
 
