@@ -68,7 +68,7 @@ public class SendResultsEmail
         if (matches.Count == 0)
         {
             stringBuilder.Append("""
-                        <p>No games were played today!<p/>
+                        <p>No games were played today!</p>
                     </body>
                 </html>
                 """);
