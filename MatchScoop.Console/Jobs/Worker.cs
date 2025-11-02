@@ -32,7 +32,7 @@ public class Worker : BackgroundService
                 var result = await _getResults.Handle();
                 if (result.IsFailure)
                 {
-                    _logger.LogInformation(
+                    _logger.LogCritical(
                         "There was an error getting results: {Error}",
                         result.Error
                     );
@@ -42,16 +42,28 @@ public class Worker : BackgroundService
                 _logger.LogInformation("{GamesCount} games gathered.", matches.Count);
 
                 _logger.LogInformation("Sending email.");
-                await _sendResultsEmail.Handle(matches, stoppingToken);
+                var emailResult = await _sendResultsEmail.Handle(matches, stoppingToken);
+                if (emailResult.IsFailure)
+                {
+                    _logger.LogCritical(
+                        "There was an error sending email: {Error}",
+                        emailResult.Error
+                    );
+                    return;
+                }
             } while (await timer.WaitForNextTickAsync(stoppingToken));
         }
         catch (OperationCanceledException oex)
         {
-            _logger.LogError(oex, "Stopping background job.");
+            _logger.LogInformation(oex, "Stopping background job.");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an error.");
+        }
+        finally
+        {
+            _logger.LogInformation("Background job has stopped.");
         }
     }
 }

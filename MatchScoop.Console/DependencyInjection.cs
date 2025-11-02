@@ -29,7 +29,6 @@ public static class DependencyInjection
         services.AddScoped<GetResults>();
     }
 
-    private static void ConfigureJobs(this IServiceCollection services)
-        => services.AddHostedService<Worker>();
-
+    private static void ConfigureJobs(this IServiceCollection services) =>
+        services.AddHostedService<Worker>();
 }

@@ -10,5 +10,4 @@ public class EmailOptions
     public bool StartTls { get; set; }
     public string? RecipientEmail { get; set; }
     public string? RecipientName { get; set; }
-
 }
