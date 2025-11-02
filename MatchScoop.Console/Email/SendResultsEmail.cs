@@ -98,9 +98,8 @@ public class SendResultsEmail
                         <td style="text-align:right">{match.Home.Score}</td>
                         <td>-</td>
                         <td>{match.Away.Score}</td>
-                        <td style="text-align:center">{match.Away.Name}</td>
+                        <td style="text-align:center; margin-bottom:10px;">{match.Away.Name}</td>
                     </tr>
-                    <tr></tr>
                 """);
         }
 
