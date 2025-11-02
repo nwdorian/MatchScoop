@@ -21,7 +21,7 @@ public class SendResultsEmail
         _logger = logger;
     }
 
-    public async Task<Result> Handle(List<Match> matches, CancellationToken ct)
+    public async Task<Result> Handle(IReadOnlyList<Match> matches, CancellationToken ct)
     {
         try
         {
@@ -61,7 +61,7 @@ public class SendResultsEmail
         }
     }
 
-    private static string CreateMessageBody(List<Match> matches)
+    private static string CreateMessageBody(IReadOnlyList<Match> matches)
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append(

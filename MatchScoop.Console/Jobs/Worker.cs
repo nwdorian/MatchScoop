@@ -32,14 +32,17 @@ public class Worker : BackgroundService
                 var result = await _getResults.Handle();
                 if (result.IsFailure)
                 {
-                    _logger.LogInformation("There was an error getting results: {Error}", result.Error);
+                    _logger.LogInformation(
+                        "There was an error getting results: {Error}",
+                        result.Error
+                    );
                     return;
                 }
                 var matches = result.Value;
                 _logger.LogInformation("{GamesCount} games gathered.", matches.Count);
 
                 _logger.LogInformation("Sending email.");
-                await _sendResultsEmail.Handle(matches);
+                await _sendResultsEmail.Handle(matches, stoppingToken);
             } while (await timer.WaitForNextTickAsync(stoppingToken));
         }
         catch (OperationCanceledException oex)

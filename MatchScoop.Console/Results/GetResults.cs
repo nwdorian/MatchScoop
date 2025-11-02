@@ -19,7 +19,9 @@ public class GetResults
     public async Task<Result<IReadOnlyList<Match>>> Handle()
     {
         var webpage = await new HtmlWeb().LoadFromWebAsync(_scrapingOptions.BaseAddress);
-        var nodes = webpage.DocumentNode.SelectNodes("//*[@id=\"content\"]/div[@class='game_summaries']/div/table[@class='teams']/tbody");
+        var nodes = webpage.DocumentNode.SelectNodes(
+            "//*[@id=\"content\"]/div[@class='game_summaries']/div/table[@class='teams']/tbody"
+        );
 
         var matches = new List<Match>();
 
@@ -31,9 +33,15 @@ public class GetResults
         foreach (var node in nodes)
         {
             var homeTeamName = node.SelectSingleNode("tr[2]/td[1]").InnerText;
-            var homeTeamScore = int.Parse(node.SelectSingleNode("tr[2]/td[2]").InnerText, CultureInfo.InvariantCulture);
+            var homeTeamScore = int.Parse(
+                node.SelectSingleNode("tr[2]/td[2]").InnerText,
+                CultureInfo.InvariantCulture
+            );
             var awayTeamName = node.SelectSingleNode("tr[1]/td[1]").InnerText;
-            var awayTeamScore = int.Parse(node.SelectSingleNode("tr[1]/td[2]").InnerText, CultureInfo.InvariantCulture);
+            var awayTeamScore = int.Parse(
+                node.SelectSingleNode("tr[1]/td[2]").InnerText,
+                CultureInfo.InvariantCulture
+            );
 
             var match = new Match(
                 new Team(homeTeamName, homeTeamScore),
