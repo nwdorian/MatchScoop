@@ -49,7 +49,7 @@ public class SendResultsEmail
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error!");
+            _logger.LogError(ex, "There was an error sending an email at {Time}!", DateTime.Now);
             return Result.Failure("There was an error: " + ex.Message);
         }
     }
