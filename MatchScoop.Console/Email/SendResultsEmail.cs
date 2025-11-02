@@ -26,20 +26,26 @@ public class SendResultsEmail
         try
         {
             var message = new MimeMessage();
-            var sender = new MailboxAddress("Match Scoop", _emailOptions.UserEmail);
+            var sender = new MailboxAddress(_emailOptions.UserName, _emailOptions.UserEmail);
             message.From.Add(sender);
-            var recipient = new MailboxAddress(_emailOptions.RecipientName, _emailOptions.RecipientEmail);
+            var recipient = new MailboxAddress(
+                _emailOptions.RecipientName,
+                _emailOptions.RecipientEmail
+            );
             message.To.Add(recipient);
             message.Subject = $"Match Scoop NBA Results for {DateTime.Now:d}";
 
-            var bb = new BodyBuilder
-            {
-                HtmlBody = CreateMessageBody(matches)
-            };
+            var bb = new BodyBuilder { HtmlBody = CreateMessageBody(matches) };
             message.Body = bb.ToMessageBody();
 
             using var smtp = new SmtpClient();
-            await smtp.ConnectAsync(_emailOptions.SmtpServer, _emailOptions.Port, MailKit.Security.SecureSocketOptions.StartTls);
+            await smtp.ConnectAsync(
+                _emailOptions.SmtpServer,
+                _emailOptions.Port,
+                _emailOptions.StartTls
+                    ? MailKit.Security.SecureSocketOptions.StartTls
+                    : MailKit.Security.SecureSocketOptions.None
+            );
             await smtp.AuthenticateAsync(_emailOptions.UserEmail, _emailOptions.Password);
             await smtp.SendAsync(message);
             await smtp.DisconnectAsync(true);
@@ -57,25 +63,30 @@ public class SendResultsEmail
     private static string CreateMessageBody(List<Match> matches)
     {
         var stringBuilder = new StringBuilder();
-        stringBuilder.Append(CultureInfo.InvariantCulture,
+        stringBuilder.Append(
+            CultureInfo.InvariantCulture,
             $"""
             <html>
                 <body>
                     <h1>NBA games report</h1>
                     <br/>
-            """);
+            """
+        );
 
         if (matches.Count == 0)
         {
-            stringBuilder.Append("""
+            stringBuilder.Append(
+                """
                         <p>No games were played today!</p>
                     </body>
                 </html>
-                """);
+                """
+            );
             return stringBuilder.ToString();
         }
 
-        stringBuilder.Append("""
+        stringBuilder.Append(
+            """
             <table>
                 <thead>
                     <tr>
@@ -87,11 +98,13 @@ public class SendResultsEmail
                     </tr>
                 </thead>
                 <tbody>
-            """);
+            """
+        );
 
         foreach (var match in matches)
         {
-            stringBuilder.Append(CultureInfo.InvariantCulture,
+            stringBuilder.Append(
+                CultureInfo.InvariantCulture,
                 $"""
                     <tr>
                         <td style="text-align:center">{match.Home.Name}</td>
@@ -100,15 +113,18 @@ public class SendResultsEmail
                         <td>{match.Away.Score}</td>
                         <td style="text-align:center; margin-bottom:10px;">{match.Away.Name}</td>
                     </tr>
-                """);
+                """
+            );
         }
 
-        stringBuilder.Append("""
-                        </tbody>
-                    </table>
-                </body>
-            </html>
-        """);
+        stringBuilder.Append(
+            """
+                            </tbody>
+                        </table>
+                    </body>
+                </html>
+            """
+        );
 
         return stringBuilder.ToString();
     }
