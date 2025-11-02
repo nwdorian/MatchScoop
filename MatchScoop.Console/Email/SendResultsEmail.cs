@@ -21,7 +21,7 @@ public class SendResultsEmail
         _logger = logger;
     }
 
-    public async Task<Result> Handle(IEnumerable<Match> matches)
+    public async Task<Result> Handle(List<Match> matches)
     {
         try
         {
@@ -54,10 +54,8 @@ public class SendResultsEmail
         }
     }
 
-    private static string CreateMessageBody(IEnumerable<Match> matches)
+    private static string CreateMessageBody(List<Match> matches)
     {
-        var matchList = matches.ToList();
-
         var stringBuilder = new StringBuilder();
         stringBuilder.Append(CultureInfo.InvariantCulture,
             $"""
@@ -67,7 +65,7 @@ public class SendResultsEmail
                     <br/>
             """);
 
-        if (matchList.Count == 0)
+        if (matches.Count == 0)
         {
             stringBuilder.Append("""
                         <p>No games were played today!<p/>
@@ -91,7 +89,7 @@ public class SendResultsEmail
                 <tbody>
             """);
 
-        foreach (var match in matchList)
+        foreach (var match in matches)
         {
             stringBuilder.Append(CultureInfo.InvariantCulture,
                 $"""
