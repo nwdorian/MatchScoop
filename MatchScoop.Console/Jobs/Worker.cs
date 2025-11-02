@@ -29,26 +29,42 @@ public class Worker : BackgroundService
             do
             {
                 _logger.LogInformation("Getting match information.");
-                var result = await _getResults.Handle();
+                var result = await _getResults.Handle(stoppingToken);
                 if (result.IsFailure)
                 {
-                    _logger.LogInformation("There was an error getting results: {Error}", result.Error);
+                    _logger.LogCritical(
+                        "There was an error getting results: {Error}",
+                        result.Error
+                    );
                     return;
                 }
                 var matches = result.Value;
                 _logger.LogInformation("{GamesCount} games gathered.", matches.Count);
 
                 _logger.LogInformation("Sending email.");
-                await _sendResultsEmail.Handle(matches);
+                var emailResult = await _sendResultsEmail.Handle(matches, stoppingToken);
+                if (emailResult.IsFailure)
+                {
+                    _logger.LogCritical(
+                        "There was an error sending email: {Error}",
+                        emailResult.Error
+                    );
+                    return;
+                }
+                _logger.LogInformation("Email sent successfully!");
             } while (await timer.WaitForNextTickAsync(stoppingToken));
         }
         catch (OperationCanceledException oex)
         {
-            _logger.LogError(oex, "Stopping background job.");
+            _logger.LogInformation(oex, "Stopping background job.");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an error.");
+        }
+        finally
+        {
+            _logger.LogInformation("Background job has stopped.");
         }
     }
 }

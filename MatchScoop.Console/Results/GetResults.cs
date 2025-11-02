@@ -16,33 +16,48 @@ public class GetResults
         _scrapingOptions = scrapingOptions.Value;
     }
 
-    public async Task<Result<IReadOnlyList<Match>>> Handle()
+    public async Task<Result<IReadOnlyList<Match>>> Handle(CancellationToken ct)
     {
-        var webpage = await new HtmlWeb().LoadFromWebAsync(_scrapingOptions.BaseAddress);
-        var nodes = webpage.DocumentNode.SelectNodes("//*[@id=\"content\"]/div[@class='game_summaries']/div/table[@class='teams']/tbody");
-
-        var matches = new List<Match>();
-
-        if (nodes is null)
+        try
         {
-            return matches;
-        }
-
-        foreach (var node in nodes)
-        {
-            var homeTeamName = node.SelectSingleNode("tr[2]/td[1]").InnerText;
-            var homeTeamScore = int.Parse(node.SelectSingleNode("tr[2]/td[2]").InnerText, CultureInfo.InvariantCulture);
-            var awayTeamName = node.SelectSingleNode("tr[1]/td[1]").InnerText;
-            var awayTeamScore = int.Parse(node.SelectSingleNode("tr[1]/td[2]").InnerText, CultureInfo.InvariantCulture);
-
-            var match = new Match(
-                new Team(homeTeamName, homeTeamScore),
-                new Team(awayTeamName, awayTeamScore)
+            var webpage = await new HtmlWeb().LoadFromWebAsync(_scrapingOptions.BaseAddress, ct);
+            var nodes = webpage.DocumentNode.SelectNodes(
+                "//*[@id=\"content\"]/div[@class='game_summaries']/div/table[@class='teams']/tbody"
             );
 
-            matches.Add(match);
-        }
+            var matches = new List<Match>();
 
-        return matches;
+            if (nodes is null)
+            {
+                return matches;
+            }
+
+            foreach (var node in nodes)
+            {
+                var homeTeamName = node.SelectSingleNode("tr[2]/td[1]").InnerText;
+                var homeTeamScore = int.Parse(
+                    node.SelectSingleNode("tr[2]/td[2]").InnerText,
+                    CultureInfo.InvariantCulture
+                );
+                var awayTeamName = node.SelectSingleNode("tr[1]/td[1]").InnerText;
+                var awayTeamScore = int.Parse(
+                    node.SelectSingleNode("tr[1]/td[2]").InnerText,
+                    CultureInfo.InvariantCulture
+                );
+
+                var match = new Match(
+                    new Team(homeTeamName, homeTeamScore),
+                    new Team(awayTeamName, awayTeamScore)
+                );
+
+                matches.Add(match);
+            }
+
+            return matches;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<IReadOnlyList<Match>>("There was an error: " + ex.Message);
+        }
     }
 }
