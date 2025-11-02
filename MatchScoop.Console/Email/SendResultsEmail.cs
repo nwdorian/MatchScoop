@@ -21,7 +21,7 @@ public class SendResultsEmail
         _logger = logger;
     }
 
-    public async Task<Result> Handle(List<Match> matches)
+    public async Task<Result> Handle(List<Match> matches, CancellationToken ct)
     {
         try
         {
@@ -44,11 +44,12 @@ public class SendResultsEmail
                 _emailOptions.Port,
                 _emailOptions.StartTls
                     ? MailKit.Security.SecureSocketOptions.StartTls
-                    : MailKit.Security.SecureSocketOptions.None
+                    : MailKit.Security.SecureSocketOptions.None,
+                ct
             );
-            await smtp.AuthenticateAsync(_emailOptions.UserEmail, _emailOptions.Password);
+            await smtp.AuthenticateAsync(_emailOptions.UserEmail, _emailOptions.Password, ct);
             await smtp.SendAsync(message);
-            await smtp.DisconnectAsync(true);
+            await smtp.DisconnectAsync(true, ct);
 
             _logger.LogInformation("Email sent successfully!");
             return Result.Success();
