@@ -29,7 +29,7 @@ public class Worker : BackgroundService
             do
             {
                 _logger.LogInformation("Getting match information.");
-                var result = await _getResults.Handle();
+                var result = await _getResults.Handle(stoppingToken);
                 if (result.IsFailure)
                 {
                     _logger.LogCritical(
@@ -51,6 +51,7 @@ public class Worker : BackgroundService
                     );
                     return;
                 }
+                _logger.LogInformation("Email sent successfully!");
             } while (await timer.WaitForNextTickAsync(stoppingToken));
         }
         catch (OperationCanceledException oex)
